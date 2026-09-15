@@ -5,47 +5,47 @@ Option Explicit
 ' MODULO: modReferencia
 ' Carrega a Tabela de Referencia externa (arquivo REF_FILE_PATH, ver
 ' modConfig) com as abas "Referencia", "MarcasExtras"/"MarcasExtra" e
-' "ExcecoesMarca", e monta os dicionários usados nas demais etapas.
+' "ExcecoesMarca", e monta os dicionarios usados nas demais etapas.
 ' ==========================================================================
 
 ' ==========================================================================
-' Carrega a Tabela de Referência (arquivo externo) e monta:
+' Carrega a Tabela de Referencia (arquivo externo) e monta:
 '   dicSegPorGeobox      : chave GEOBOX -> SEGMENTO mais frequente entre os
-'                          valores NÃO VAZIOS daquele GEOBOX na aba
-'                          "Referencia" (linhas com Segmento vazio não
-'                          entram na votação)
+'                          valores NAO VAZIOS daquele GEOBOX na aba
+'                          "Referencia" (linhas com Segmento vazio nao
+'                          entram na votacao)
 '   dicLpPorGeobox       : chave GEOBOX -> LP. Fora de BR/MIN: LP mais
-'                          frequente entre os valores NÃO VAZIOS daquele
-'                          GEOBOX (maioria, votação independente da de
+'                          frequente entre os valores NAO VAZIOS daquele
+'                          GEOBOX (maioria, votacao independente da de
 '                          Segmento). Em BR/MIN: LP da PRIMEIRA linha da
-'                          Referência com aquele GEOBOX, sem votação.
+'                          Referencia com aquele GEOBOX, sem votacao.
 '   dicLpPorGeoboxMarca  : chave GEOBOX & "|@|" & MARCA -> LP mais frequente
-'                          (maioria) entre as linhas da Referência que têm
-'                          ESSA combinação exata de GEOBOX e MARCA. Só
-'                          montado em modo BR/MIN — usado como 1ª tentativa
-'                          de LP em modMain (mais específico que só GEOBOX);
-'                          se a combinação não existir, cai no dicLpPorGeobox
-'                          normal (só GEOBOX).
-'   arrMarcas()          : array de marcas únicas, ordenado da mais longa p/ mais curta
-'   dicGeoboxPorMarca    : chave MARCA -> Collection de GEOBOX únicos daquela marca
-'   dicGeoboxGlobalUnicos: chave GEOBOX -> True (todos os geobox únicos, p/ busca ampla)
-'   dicGamasPorMarca     : chave MARCA -> Collection de GAMA únicas daquela marca
-'   dicGamaGlobalUnicos  : chave GAMA -> True (todas as gamas únicas, p/ busca ampla)
-'   dicMarcaPorGama      : chave GAMA -> MARCA dona daquela gama (1ª encontrada na
-'                          Referência) — usado pra "descobrir" a marca a partir da
-'                          gama quando a marca não foi lida na descrição
-'   dicExcecoesGama      : chave PADRÃO ABREVIADO -> GAMA correta (aba "ExcecoesGama",
+'                          (maioria) entre as linhas da Referencia que tem
+'                          ESSA combinacao exata de GEOBOX e MARCA. So
+'                          montado em modo BR/MIN -- usado como 1a tentativa
+'                          de LP em modMain (mais especifico que so GEOBOX);
+'                          se a combinacao nao existir, cai no dicLpPorGeobox
+'                          normal (so GEOBOX).
+'   arrMarcas()          : array de marcas unicas, ordenado da mais longa p/ mais curta
+'   dicGeoboxPorMarca    : chave MARCA -> Collection de GEOBOX unicos daquela marca
+'   dicGeoboxGlobalUnicos: chave GEOBOX -> True (todos os geobox unicos, p/ busca ampla)
+'   dicGamasPorMarca     : chave MARCA -> Collection de GAMA unicas daquela marca
+'   dicGamaGlobalUnicos  : chave GAMA -> True (todas as gamas unicas, p/ busca ampla)
+'   dicMarcaPorGama      : chave GAMA -> MARCA dona daquela gama (1a encontrada na
+'                          Referencia) -- usado pra "descobrir" a marca a partir da
+'                          gama quando a marca nao foi lida na descricao
+'   dicExcecoesGama      : chave PADRAO ABREVIADO -> GAMA correta (aba "ExcecoesGama",
 '                          ex: "PTNZ" -> "POTENZA"), checada antes da busca normal
 '
-' somenteMinBr: quando True, restringe SÓ os dicionários de GEOBOX (dicSegPorGeobox,
-' dicLpPorGeobox, dicGeoboxPorMarca, dicGeoboxGlobalUnicos) às linhas da aba
-' "Referencia" cuja coluna F ("Base de referência") seja uma das 4 fontes
-' STORM de Beyond Road/Mineração (40117090, 40118090, 40119090, 40129090),
-' "Dicionário WW" ou "Input manual" (GEOBOX classificados à mão pelo
-' usuário) — essas LPs não têm interseção de GEOBOX entre si, então
+' somenteMinBr: quando True, restringe SO os dicionarios de GEOBOX (dicSegPorGeobox,
+' dicLpPorGeobox, dicGeoboxPorMarca, dicGeoboxGlobalUnicos) as linhas da aba
+' "Referencia" cuja coluna F ("Base de referencia") seja uma das 4 fontes
+' STORM de Beyond Road/Mineracao (40117090, 40118090, 40119090, 40129090),
+' "Dicionario WW" ou "Input manual" (GEOBOX classificados a mao pelo
+' usuario) -- essas LPs nao tem intersecao de GEOBOX entre si, entao
 ' restringir evita ambiguidade. MARCA e GAMA (arrMarcas, dicGamasPorMarca,
 ' dicGamaGlobalUnicos, dicMarcaPorGama) continuam sendo montados a partir da
-' Referência INTEIRA, sem esse filtro — uma marca/gama pode estar cadastrada
+' Referencia INTEIRA, sem esse filtro -- uma marca/gama pode estar cadastrada
 ' fora dessas fontes e mesmo assim ser a marca/gama certa do produto.
 ' ==========================================================================
 Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPorGeobox As Object, _
@@ -63,7 +63,7 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
     Dim wbName As String
     wbName = Mid(REF_FILE_PATH, InStrRev(REF_FILE_PATH, "\") + 1)
 
-    ' Reaproveita se já estiver aberto, senão abre
+    ' Reaproveita se ja estiver aberto, senao abre
     On Error Resume Next
     Set wbRef = Workbooks(wbName)
     On Error GoTo ErroAbrir
@@ -75,7 +75,7 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
     End If
 
     diagnostico = "Arquivo usado: " & wbRef.FullName & vbCrLf
-    diagnostico = diagnostico & "Já estava aberto antes de rodar a macro? " & IIf(wasOpen, "SIM (reaproveitou a instância já aberta)", "Não (abriu agora)") & vbCrLf
+    diagnostico = diagnostico & "Ja estava aberto antes de rodar a macro? " & IIf(wasOpen, "SIM (reaproveitou a instancia ja aberta)", "Nao (abriu agora)") & vbCrLf
     diagnostico = diagnostico & "Abas encontradas no arquivo: "
     Dim wsDiag As Worksheet
     For Each wsDiag In wbRef.Sheets
@@ -93,53 +93,53 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
     Set dicMarcaPorGama = CreateObject("Scripting.Dictionary")
 
     ' dicVotosSegPorGeo / dicVotosLpPorGeo: chave GEOBOX -> Dictionary(valor -> contagem).
-    ' Votações independentes: uma conta SEGMENTO, a outra conta LP, cada
-    ' uma ignorando linhas onde o próprio valor está vazio.
+    ' Votacoes independentes: uma conta SEGMENTO, a outra conta LP, cada
+    ' uma ignorando linhas onde o proprio valor esta vazio.
     Dim dicVotosSegPorGeo As Object, dicVotosLpPorGeo As Object
     Set dicVotosSegPorGeo = CreateObject("Scripting.Dictionary")
     Set dicVotosLpPorGeo = CreateObject("Scripting.Dictionary")
 
-    ' GEOBOX -> LP da PRIMEIRA linha encontrada com esse GEOBOX. Só usado em
-    ' modo BR/MIN (ver mais abaixo) — substitui a votação por maioria, que
-    ' nesse modo estava juntando LP de linhas que não deveriam contar.
+    ' GEOBOX -> LP da PRIMEIRA linha encontrada com esse GEOBOX. So usado em
+    ' modo BR/MIN (ver mais abaixo) -- substitui a votacao por maioria, que
+    ' nesse modo estava juntando LP de linhas que nao deveriam contar.
     Dim dicLpPrimeiraOcorrenciaMinBr As Object
     Set dicLpPrimeiraOcorrenciaMinBr = CreateObject("Scripting.Dictionary")
 
-    ' chave GEOBOX & "|@|" & MARCA -> Dictionary(LP -> contagem). Só usado em
-    ' modo BR/MIN — vira dicLpPorGeoboxMarca (maioria) no fim da função.
+    ' chave GEOBOX & "|@|" & MARCA -> Dictionary(LP -> contagem). So usado em
+    ' modo BR/MIN -- vira dicLpPorGeoboxMarca (maioria) no fim da funcao.
     Dim dicVotosLpPorGeoMarca As Object
     Set dicVotosLpPorGeoMarca = CreateObject("Scripting.Dictionary")
 
     Dim dicMarcasUnicas As Object
     Set dicMarcasUnicas = CreateObject("Scripting.Dictionary")
 
-    ' dicGeoboxSetPorMarca / dicGamaSetPorMarca: mesma informação de
+    ' dicGeoboxSetPorMarca / dicGamaSetPorMarca: mesma informacao de
     ' dicGeoboxPorMarca/dicGamasPorMarca, mas como Dictionary (chave = valor
-    ' já visto) em vez de Collection. Usados só pra checar duplicata em O(1)
-    ' ao montar as Collections abaixo — varrer a Collection inteira (O(n))
-    ' pra cada linha da Referência vira O(n²) numa marca com muitos GEOBOX/
-    ' GAMA únicos (caso comum em bases BR/MIN, com centenas por marca).
+    ' ja visto) em vez de Collection. Usados so pra checar duplicata em O(1)
+    ' ao montar as Collections abaixo -- varrer a Collection inteira (O(n))
+    ' pra cada linha da Referencia vira O(n2) numa marca com muitos GEOBOX/
+    ' GAMA unicos (caso comum em bases BR/MIN, com centenas por marca).
     Dim dicGeoboxSetPorMarca As Object, dicGamaSetPorMarca As Object
     Set dicGeoboxSetPorMarca = CreateObject("Scripting.Dictionary")
     Set dicGamaSetPorMarca = CreateObject("Scripting.Dictionary")
 
-    ' --- Modo BR/MIN: filtra pela coluna F ("Base de referência") em vez  ---
+    ' --- Modo BR/MIN: filtra pela coluna F ("Base de referencia") em vez  ---
     ' --- de LP. Uma mesma LP (MIN/BR) podia estar espalhada em outras     ---
-    ' --- fontes/linhas fora do escopo de Beyond Road — filtrar direto     ---
-    ' --- pela fonte de origem é mais preciso.                             ---
+    ' --- fontes/linhas fora do escopo de Beyond Road -- filtrar direto     ---
+    ' --- pela fonte de origem e mais preciso.                             ---
     Dim dicFontesMinBr As Object
     Set dicFontesMinBr = CreateObject("Scripting.Dictionary")
     dicFontesMinBr.Add "STORM 40117090", True
     dicFontesMinBr.Add "STORM 40118090", True
     dicFontesMinBr.Add "STORM 40119090", True
     dicFontesMinBr.Add "STORM 40129090", True
-    dicFontesMinBr.Add UCase("Dicionário WW"), True ' baseRef é comparado em UCase mais abaixo
-    dicFontesMinBr.Add UCase("Input manual"), True ' geobox classificados manualmente pelo usuário
+    dicFontesMinBr.Add UCase("Dicionario WW"), True ' baseRef e comparado em UCase mais abaixo
+    dicFontesMinBr.Add UCase("Input manual"), True ' geobox classificados manualmente pelo usuario
 
-    ' Usa a maior "última linha com dado" entre as 6 colunas (Geobox, Marca,
-    ' Gama, LP, Segmento, Base de referência) em vez de só a coluna A. Uma
-    ' linha só com Marca preenchida (sem Geobox) precisa ser lida do mesmo
-    ' jeito — se olhássemos só a coluna A, o laço pararia antes de chegar nela.
+    ' Usa a maior "ultima linha com dado" entre as 6 colunas (Geobox, Marca,
+    ' Gama, LP, Segmento, Base de referencia) em vez de so a coluna A. Uma
+    ' linha so com Marca preenchida (sem Geobox) precisa ser lida do mesmo
+    ' jeito -- se olhassemos so a coluna A, o laco pararia antes de chegar nela.
     Dim lastRowRef As Long, i As Long
     lastRowRef = 1
     Dim colRef As Long, ultimaLinhaColRef As Long
@@ -152,42 +152,42 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
     Dim qtdLinhasIgnoradasMinBr As Long
     qtdLinhasIgnoradasMinBr = 0
 
-    ' --- Lê as 6 colunas de uma vez só num array em memória. Evita milhares de ---
-    ' --- chamadas COM individuais (wsRef.Cells) numa base grande — cada uma é ---
-    ' --- uma exposição a queda de conexão (ex: sync do OneDrive/SharePoint no ---
+    ' --- Le as 6 colunas de uma vez so num array em memoria. Evita milhares de ---
+    ' --- chamadas COM individuais (wsRef.Cells) numa base grande -- cada uma e ---
+    ' --- uma exposicao a queda de conexao (ex: sync do OneDrive/SharePoint no ---
     ' --- meio da leitura, causando erro -2147417848 "_Default do Range falhou"). ---
     Dim arrRef As Variant
     arrRef = wsRef.Range(wsRef.Cells(2, 1), wsRef.Cells(lastRowRef, 6)).Value
 
     For i = 2 To lastRowRef
         geo = UCase(Trim(CStr(arrRef(i - 1, 1))))             ' GEOBOX
-        geo = NormalizarFormatacaoBasica(geo)                 ' mesma normalização usada na busca
+        geo = NormalizarFormatacaoBasica(geo)                 ' mesma normalizacao usada na busca
         marcaRef = UCase(Trim(CStr(arrRef(i - 1, 2))))        ' MARCA
-        ' Placeholders de "marca desconhecida" na Referência (erro de       ---
-        ' digitação/preenchimento provisório) — tratados como célula vazia, ---
-        ' senão viram "marca" válida e batem em quase qualquer descrição    ---
-        ' (ex: "-" acha hífen em qualquer texto, "0" acha o dígito 0).      ---
+        ' Placeholders de "marca desconhecida" na Referencia (erro de       ---
+        ' digitacao/preenchimento provisorio) -- tratados como celula vazia, ---
+        ' senao viram "marca" valida e batem em quase qualquer descricao    ---
+        ' (ex: "-" acha hifen em qualquer texto, "0" acha o digito 0).      ---
         If marcaRef = "-" Or marcaRef = "0" Or marcaRef = "0000" Or marcaRef = "N/A" Or marcaRef = "NA" Then
             marcaRef = ""
         End If
-        gama = UCase(Trim(CStr(arrRef(i - 1, 3))))            ' GAMA (não usada na busca de segmento/LP)
+        gama = UCase(Trim(CStr(arrRef(i - 1, 3))))            ' GAMA (nao usada na busca de segmento/LP)
         lp = UCase(Trim(CStr(arrRef(i - 1, 4))))              ' LP
         seg = UCase(Trim(CStr(arrRef(i - 1, 5))))             ' SEGMENTO
-        baseRef = UCase(Trim(CStr(arrRef(i - 1, 6))))         ' BASE DE REFERÊNCIA
+        baseRef = UCase(Trim(CStr(arrRef(i - 1, 6))))         ' BASE DE REFERENCIA
 
-        ' --- Base BR/MIN: só restringe o que é ESPECÍFICO DE GEOBOX (essas   ---
-        ' --- LPs não têm interseção de geobox entre si, então limitar às    ---
+        ' --- Base BR/MIN: so restringe o que e ESPECIFICO DE GEOBOX (essas   ---
+        ' --- LPs nao tem intersecao de geobox entre si, entao limitar as    ---
         ' --- 4 fontes STORM/WW/Input manual evita ambiguidade ali). MARCA e ---
-        ' --- GAMA continuam sendo buscadas na Referência INTEIRA, mesmo em  ---
-        ' --- modo BR/MIN — uma marca/gama pode estar cadastrada só fora     ---
+        ' --- GAMA continuam sendo buscadas na Referencia INTEIRA, mesmo em  ---
+        ' --- modo BR/MIN -- uma marca/gama pode estar cadastrada so fora     ---
         ' --- dessas fontes e ainda assim ser a marca/gama certa do produto. ---
         Dim geoBrOk As Boolean
         geoBrOk = (Not somenteMinBr) Or dicFontesMinBr.Exists(baseRef)
         If somenteMinBr And Not geoBrOk Then qtdLinhasIgnoradasMinBr = qtdLinhasIgnoradasMinBr + 1
 
-        ' --- Vota SEGMENTO e LP separadamente para esse GEOBOX, cada um só ---
-        ' --- quando o próprio valor não está vazio (linha em branco numa  ---
-        ' --- delas não conta como voto nem "suja" a outra votação).       ---
+        ' --- Vota SEGMENTO e LP separadamente para esse GEOBOX, cada um so ---
+        ' --- quando o proprio valor nao esta vazio (linha em branco numa  ---
+        ' --- delas nao conta como voto nem "suja" a outra votacao).       ---
         Dim subVotos As Object
 
         If geoBrOk Then
@@ -205,9 +205,9 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
 
             If Len(geo) > 0 And Len(lp) > 0 Then
                 If somenteMinBr Then
-                    ' --- Em BR/MIN, LP não é por maioria de votos — fica com a  ---
-                    ' --- PRIMEIRA linha da Referência que tiver esse GEOBOX     ---
-                    ' --- (ordem da própria planilha), sem contar ocorrências.   ---
+                    ' --- Em BR/MIN, LP nao e por maioria de votos -- fica com a  ---
+                    ' --- PRIMEIRA linha da Referencia que tiver esse GEOBOX     ---
+                    ' --- (ordem da propria planilha), sem contar ocorrencias.   ---
                     If Not dicLpPrimeiraOcorrenciaMinBr.Exists(geo) Then
                         dicLpPrimeiraOcorrenciaMinBr.Add geo, lp
                     End If
@@ -223,10 +223,10 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
                     End If
                 End If
 
-                ' --- Votação por GEOBOX + MARCA combinados (só BR/MIN) —      ---
-                ' --- mais específica que a votação só por GEOBOX acima; usada ---
-                ' --- em modMain como 1ª tentativa de LP, antes de cair na de  ---
-                ' --- só GEOBOX.                                               ---
+                ' --- Votacao por GEOBOX + MARCA combinados (so BR/MIN) --      ---
+                ' --- mais especifica que a votacao so por GEOBOX acima; usada ---
+                ' --- em modMain como 1a tentativa de LP, antes de cair na de  ---
+                ' --- so GEOBOX.                                               ---
                 If somenteMinBr And Len(marcaRef) > 0 Then
                     Dim chaveGeoMarca As String
                     chaveGeoMarca = geo & "|@|" & marcaRef
@@ -280,22 +280,22 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
         If Len(gama) > 0 Then
             If Not dicGamaGlobalUnicos.Exists(gama) Then dicGamaGlobalUnicos.Add gama, True
 
-            ' Gama é tratada como praticamente exclusiva de uma marca — a
-            ' primeira marca encontrada pra essa gama na Referência "ganha"
-            ' o dicionário reverso (ignora linhas com marca vazia).
+            ' Gama e tratada como praticamente exclusiva de uma marca -- a
+            ' primeira marca encontrada pra essa gama na Referencia "ganha"
+            ' o dicionario reverso (ignora linhas com marca vazia).
             If Len(marcaRef) > 0 And Not dicMarcaPorGama.Exists(gama) Then
                 dicMarcaPorGama.Add gama, marcaRef
             End If
         End If
     Next i
 
-    ' --- Monta dicSegPorGeobox: fica com o valor NÃO VAZIO mais votado       ---
+    ' --- Monta dicSegPorGeobox: fica com o valor NAO VAZIO mais votado       ---
     ' --- (maioria); em empate, o primeiro encontrado (ordem da Referencia). ---
     Set dicSegPorGeobox = MontarDicMaioriaPorGeobox(dicVotosSegPorGeo)
 
-    ' --- dicLpPorGeobox: em modo BR/MIN, é a PRIMEIRA linha da Referência   ---
-    ' --- com aquele GEOBOX (dicLpPrimeiraOcorrenciaMinBr) — não é mais      ---
-    ' --- maioria de votos, pra não misturar LP de linhas que não deveriam.  ---
+    ' --- dicLpPorGeobox: em modo BR/MIN, e a PRIMEIRA linha da Referencia   ---
+    ' --- com aquele GEOBOX (dicLpPrimeiraOcorrenciaMinBr) -- nao e mais      ---
+    ' --- maioria de votos, pra nao misturar LP de linhas que nao deveriam.  ---
     ' --- Fora de BR/MIN, continua sendo maioria, como sempre foi.          ---
     If somenteMinBr Then
         Set dicLpPorGeobox = dicLpPrimeiraOcorrenciaMinBr
@@ -305,20 +305,20 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
         Set dicLpPorGeoboxMarca = CreateObject("Scripting.Dictionary")
     End If
 
-    diagnostico = diagnostico & "Última linha lida na aba ""Referencia"": " & lastRowRef & vbCrLf
-    diagnostico = diagnostico & "Modo BR/MIN ativado? " & IIf(somenteMinBr, "SIM (GEOBOX restrito a ""Base de referência"" = STORM 40117090/40118090/40119090/40129090, Dicionário WW ou Input manual; MARCA e GAMA continuam buscando na Referência inteira)", "Não") & vbCrLf
+    diagnostico = diagnostico & "Ultima linha lida na aba ""Referencia"": " & lastRowRef & vbCrLf
+    diagnostico = diagnostico & "Modo BR/MIN ativado? " & IIf(somenteMinBr, "SIM (GEOBOX restrito a ""Base de referencia"" = STORM 40117090/40118090/40119090/40129090, Dicionario WW ou Input manual; MARCA e GAMA continuam buscando na Referencia inteira)", "Nao") & vbCrLf
     If somenteMinBr Then
-        diagnostico = diagnostico & "Linhas da Referência fora dessas fontes (não contam para GEOBOX, mas contam para MARCA/GAMA): " & qtdLinhasIgnoradasMinBr & vbCrLf
+        diagnostico = diagnostico & "Linhas da Referencia fora dessas fontes (nao contam para GEOBOX, mas contam para MARCA/GAMA): " & qtdLinhasIgnoradasMinBr & vbCrLf
     End If
-    diagnostico = diagnostico & "Total de GEOBOX únicos com SEGMENTO mapeado: " & dicSegPorGeobox.Count & vbCrLf
-    diagnostico = diagnostico & "Total de GEOBOX únicos com LP mapeado: " & dicLpPorGeobox.Count & vbCrLf
+    diagnostico = diagnostico & "Total de GEOBOX unicos com SEGMENTO mapeado: " & dicSegPorGeobox.Count & vbCrLf
+    diagnostico = diagnostico & "Total de GEOBOX unicos com LP mapeado: " & dicLpPorGeobox.Count & vbCrLf
     If wasOpen Then
-        diagnostico = diagnostico & vbCrLf & "ATENÇÃO: o arquivo já estava aberto e foi reaproveitado. " & _
-                      "Se os números acima parecerem baixos demais, FECHE o arquivo Tabela_Referencia.xlsx " & _
-                      "no Excel (sem salvar) e rode a macro de novo — ele será reaberto do zero, com a versão mais recente salva." & vbCrLf
+        diagnostico = diagnostico & vbCrLf & "ATENCAO: o arquivo ja estava aberto e foi reaproveitado. " & _
+                      "Se os numeros acima parecerem baixos demais, FECHE o arquivo Tabela_Referencia.xlsx " & _
+                      "no Excel (sem salvar) e rode a macro de novo -- ele sera reaberto do zero, com a versao mais recente salva." & vbCrLf
     End If
 
-    ' --- Soma marcas extras da aba "MarcasExtras" (aceita variação sem "s"
+    ' --- Soma marcas extras da aba "MarcasExtras" (aceita variacao sem "s"
     ' final: "MarcasExtra") ---
     Dim wsMarcasExtras As Worksheet
     Set wsMarcasExtras = Nothing
@@ -346,13 +346,13 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
                 qtdMarcasExtrasLidas = qtdMarcasExtrasLidas + 1
             End If
         Next j
-        diagnostico = diagnostico & "Aba de marcas extras encontrada (""" & wsMarcasExtras.Name & """). Última linha: " & lastRowExtras & _
-                      ". Marcas lidas (linha 2 até " & lastRowExtras & "): " & qtdMarcasExtrasLidas & vbCrLf
+        diagnostico = diagnostico & "Aba de marcas extras encontrada (""" & wsMarcasExtras.Name & """). Ultima linha: " & lastRowExtras & _
+                      ". Marcas lidas (linha 2 ate " & lastRowExtras & "): " & qtdMarcasExtrasLidas & vbCrLf
     Else
         diagnostico = diagnostico & "Nenhuma aba ""MarcasExtras"" ou ""MarcasExtra"" encontrada nesse arquivo." & vbCrLf
     End If
 
-    ' --- Carrega exceções de marca da aba "ExcecoesMarca" (se existir) ---
+    ' --- Carrega excecoes de marca da aba "ExcecoesMarca" (se existir) ---
     Set dicExcecoesMarca = CreateObject("Scripting.Dictionary")
     Dim wsExcecoes As Worksheet
     Set wsExcecoes = Nothing
@@ -381,15 +381,15 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
                 qtdExcecoesLidas = qtdExcecoesLidas + 1
             End If
         Next j
-        diagnostico = diagnostico & "Aba ""ExcecoesMarca"" encontrada. Última linha: " & lastRowExc & _
-                      ". Exceções lidas (linha 2 até " & lastRowExc & "): " & qtdExcecoesLidas & vbCrLf
+        diagnostico = diagnostico & "Aba ""ExcecoesMarca"" encontrada. Ultima linha: " & lastRowExc & _
+                      ". Excecoes lidas (linha 2 ate " & lastRowExc & "): " & qtdExcecoesLidas & vbCrLf
     Else
-        diagnostico = diagnostico & "Aba ""ExcecoesMarca"" NÃO encontrada nesse arquivo." & vbCrLf
+        diagnostico = diagnostico & "Aba ""ExcecoesMarca"" NAO encontrada nesse arquivo." & vbCrLf
     End If
 
-    ' --- Carrega exceções/abreviações de GAMA da aba "ExcecoesGama" (se existir) ---
-    ' Mesmo modelo da "ExcecoesMarca": coluna A = padrão abreviado como
-    ' aparece na descrição (ex: "PTNZ"), coluna B = GAMA correta (ex:
+    ' --- Carrega excecoes/abreviacoes de GAMA da aba "ExcecoesGama" (se existir) ---
+    ' Mesmo modelo da "ExcecoesMarca": coluna A = padrao abreviado como
+    ' aparece na descricao (ex: "PTNZ"), coluna B = GAMA correta (ex:
     ' "POTENZA"). Checada antes da busca normal por GAMA em ExtrairGama.
     Set dicExcecoesGama = CreateObject("Scripting.Dictionary")
     Dim wsExcecoesGama As Worksheet
@@ -419,13 +419,13 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
                 qtdExcecoesGamaLidas = qtdExcecoesGamaLidas + 1
             End If
         Next j
-        diagnostico = diagnostico & "Aba ""ExcecoesGama"" encontrada. Última linha: " & lastRowExcGama & _
-                      ". Exceções lidas (linha 2 até " & lastRowExcGama & "): " & qtdExcecoesGamaLidas & vbCrLf
+        diagnostico = diagnostico & "Aba ""ExcecoesGama"" encontrada. Ultima linha: " & lastRowExcGama & _
+                      ". Excecoes lidas (linha 2 ate " & lastRowExcGama & "): " & qtdExcecoesGamaLidas & vbCrLf
     Else
-        diagnostico = diagnostico & "Aba ""ExcecoesGama"" NÃO encontrada nesse arquivo (abreviações de GAMA não serão reconhecidas)." & vbCrLf
+        diagnostico = diagnostico & "Aba ""ExcecoesGama"" NAO encontrada nesse arquivo (abreviacoes de GAMA nao serao reconhecidas)." & vbCrLf
     End If
 
-    diagnostico = diagnostico & "Total de marcas únicas na busca (Referencia + MarcasExtras): " & dicMarcasUnicas.Count
+    diagnostico = diagnostico & "Total de marcas unicas na busca (Referencia + MarcasExtras): " & dicMarcasUnicas.Count
 
     ' --- Monta arrMarcas ordenado da mais longa para a mais curta ---
     ReDim arrMarcas(0 To dicMarcasUnicas.Count - 1)
@@ -458,8 +458,8 @@ ErroAbrir:
 End Function
 
 ' ==========================================================================
-' Recebe um dicionário de votos (chave GEOBOX -> Dictionary(valor -> contagem),
-' montado ignorando valores vazios) e devolve um dicionário simples
+' Recebe um dicionario de votos (chave GEOBOX -> Dictionary(valor -> contagem),
+' montado ignorando valores vazios) e devolve um dicionario simples
 ' chave GEOBOX -> valor mais votado (maioria). Em empate, fica com o
 ' primeiro valor encontrado (ordem de leitura da aba "Referencia").
 ' ==========================================================================
@@ -488,16 +488,16 @@ Function MontarDicMaioriaPorGeobox(dicVotosPorGeo As Object) As Object
 End Function
 
 ' ==========================================================================
-' Retorna, para uma DIMENSÃO (GEOBOX) já extraída, o SEGMENTO e a LP.
-' Não depende de MARCA nem de achar a GAMA no texto — é busca direta por
-' DIMENSÃO. Regra de prioridade do LP:
-'   1) Se achou SEGMENTO pra essa dimensão, LP = DeduzirLp(segmento)
+' Retorna, para uma DIMENSAO (GEOBOX) ja extraida, o SEGMENTO e a LP.
+' Nao depende de MARCA nem de achar a GAMA no texto -- e busca direta por
+' DIMENSAO. Regra de prioridade do LP:
+'   1) Se achou SEGMENTO pra essa dimensao, LP = DeduzirLp(segmento)
 '      (TC para PC/REC/COM, PL para TLD/PPL/BUS, BR para DM).
-'   2) Se DeduzirLp não souber mapear esse segmento (retornou ""), ou se
-'      não achou SEGMENTO nenhum, usa a votação independente de LP
-'      (dicLpPorGeobox) — maioria dos valores de LP não vazios daquele
-'      GEOBOX na Tabela de Referência.
-' Se a DIMENSÃO não estiver cadastrada em nenhum dos dois dicionários,
+'   2) Se DeduzirLp nao souber mapear esse segmento (retornou ""), ou se
+'      nao achou SEGMENTO nenhum, usa a votacao independente de LP
+'      (dicLpPorGeobox) -- maioria dos valores de LP nao vazios daquele
+'      GEOBOX na Tabela de Referencia.
+' Se a DIMENSAO nao estiver cadastrada em nenhum dos dois dicionarios,
 ' retorna "" para os dois. DeduzirLp vem de modClassificacaoRegras.bas.
 ' ==========================================================================
 Sub ObterSegmentoELpPorDimensao(dimensao As String, dicSegPorGeobox As Object, dicLpPorGeobox As Object, _

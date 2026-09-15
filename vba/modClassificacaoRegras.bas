@@ -6,8 +6,8 @@ Option Explicit
 ' Regras de negocio "puras" de classificacao: deducao de LP a partir do
 ' SEGMENTO e a regra de ARO terminado em ".5" forcando LP="PL".
 ' (RT/OE e ANIP ficam direto no orquestrador por serem checagens simples
-' de uma linha só contra um dicionário; ObterSegmentoELpPorDimensao está
-' em modReferencia por depender da Tabela de Referência carregada.)
+' de uma linha so contra um dicionario; ObterSegmentoELpPorDimensao esta
+' em modReferencia por depender da Tabela de Referencia carregada.)
 ' ==========================================================================
 
 ' ==========================================================================
@@ -32,28 +32,28 @@ Function DeduzirLp(segmento As String) As String
 End Function
 
 ' ==========================================================================
-' Verifica se o ARO termina em ".5" (ex: R17.5, R19.5, R22.5, R24.5) —
-' regra que força LP = "PL", independente do que o SEGMENTO indicaria.
+' Verifica se o ARO termina em ".5" (ex: R17.5, R19.5, R22.5, R24.5) --
+' regra que forca LP = "PL", independente do que o SEGMENTO indicaria.
 ' ==========================================================================
 Function AroTerminaEmMeio(aro As String) As Boolean
     AroTerminaEmMeio = (Right(Trim(aro), 2) = ".5")
 End Function
 
 ' ==========================================================================
-' Override de LP a partir do TIPO PRODUTO (SEGMENTO) — Só pra bases BR/MIN
-' (chamado de modMain só quando somenteMinBr = True). Cada TIPO PRODUTO só
-' pode pertencer à LP que ele representa — essa regra tem prioridade final
-' sobre tudo o que veio antes (combinação GEOBOX+MARCA, GEOBOX puro,
-' DeduzirLp). A regra do ARO ".5" só é aplicada DEPOIS desta, e só se
+' Override de LP a partir do TIPO PRODUTO (SEGMENTO) -- So pra bases BR/MIN
+' (chamado de modMain so quando somenteMinBr = True). Cada TIPO PRODUTO so
+' pode pertencer a LP que ele representa -- essa regra tem prioridade final
+' sobre tudo o que veio antes (combinacao GEOBOX+MARCA, GEOBOX puro,
+' DeduzirLp). A regra do ARO ".5" so e aplicada DEPOIS desta, e so se
 ' nenhuma LP tiver sido determinada em nenhuma etapa (ver modMain).
 '   TLD, PPL, BUS -> "PL"
 '   REC, COM, PC -> "TC"
 '   AG, CL, CO, COLHEITADEIRA, COLHEITADEIRA/HPT, DM, HPT, IMPLEMENTO,
-'   INDUS, INFRA, LPT, MH, MILITAR, MPT, OUTRO, PNEUMÁTICO, PORTOS, PORTS,
-'   PULVERIZADOR, QUADRICICLO, SM, SÓLIDO -> "BR"
+'   INDUS, INFRA, LPT, MH, MILITAR, MPT, OUTRO, PNEUMATICO, PORTOS, PORTS,
+'   PULVERIZADOR, QUADRICICLO, SM, SOLIDO -> "BR"
 '   MIN -> "MIN"
-'   Qualquer outro TIPO PRODUTO (incl. vazio) -> "" (não força nada, mantém
-'   o LP que já tinha sido determinado antes desta regra).
+'   Qualquer outro TIPO PRODUTO (incl. vazio) -> "" (nao forca nada, mantem
+'   o LP que ja tinha sido determinado antes desta regra).
 ' ==========================================================================
 Function DeduzirLpBrMin(segmento As String) As String
     Static dicLpPorSegmentoBrMin As Object
@@ -83,13 +83,20 @@ Function DeduzirLpBrMin(segmento As String) As String
         dicLpPorSegmentoBrMin.Add "MILITAR", "BR"
         dicLpPorSegmentoBrMin.Add "MPT", "BR"
         dicLpPorSegmentoBrMin.Add "OUTRO", "BR"
-        dicLpPorSegmentoBrMin.Add "PNEUMÁTICO", "BR"
+        dicLpPorSegmentoBrMin.Add "PNEUMATICO", "BR"
+        ' Chave extra com acento de verdade (montada via ChrW, nao como
+        ' caractere literal no arquivo-fonte -- ver nota no topo do modulo
+        ' sobre corrupcao de encoding), caso a coluna TIPO PRODUTO real
+        ' venha escrita "PNEUMATICO" (com A acentuado).
+        dicLpPorSegmentoBrMin.Add "PNEUM" & ChrW(193) & "TICO", "BR"
         dicLpPorSegmentoBrMin.Add "PORTOS", "BR"
         dicLpPorSegmentoBrMin.Add "PORTS", "BR"
         dicLpPorSegmentoBrMin.Add "PULVERIZADOR", "BR"
         dicLpPorSegmentoBrMin.Add "QUADRICICLO", "BR"
         dicLpPorSegmentoBrMin.Add "SM", "BR"
-        dicLpPorSegmentoBrMin.Add "SÓLIDO", "BR"
+        dicLpPorSegmentoBrMin.Add "SOLIDO", "BR"
+        ' Mesma logica: chave extra acentuada via ChrW para "SOLIDO".
+        dicLpPorSegmentoBrMin.Add "S" & ChrW(211) & "LIDO", "BR"
 
         dicLpPorSegmentoBrMin.Add "MIN", "MIN"
     End If

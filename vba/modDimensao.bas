@@ -3,44 +3,44 @@ Option Explicit
 
 ' ==========================================================================
 ' MODULO: modDimensao
-' Normalização de formatação de texto de medida, extração de DIMENSÃO
-' (GEOBOX) e de ARO a partir da descrição.
+' Normalizacao de formatacao de texto de medida, extracao de DIMENSAO
+' (GEOBOX) e de ARO a partir da descricao.
 ' ==========================================================================
 
 ' ==========================================================================
-' Extrai a DIMENSÃO (GEOBOX): 1) se a marca já foi identificada, procura
-' primeiro só entre as medidas conhecidas DAQUELA marca (mais rápido e mais
-' preciso). 2) Se não achar assim, faz busca ampla em todas as medidas
-' conhecidas de todas as marcas. 3) Se ainda assim não achar, retorna "".
+' Extrai a DIMENSAO (GEOBOX): 1) se a marca ja foi identificada, procura
+' primeiro so entre as medidas conhecidas DAQUELA marca (mais rapido e mais
+' preciso). 2) Se nao achar assim, faz busca ampla em todas as medidas
+' conhecidas de todas as marcas. 3) Se ainda assim nao achar, retorna "".
 ' Em caso de mais de uma medida batendo no texto, fica com a mais longa
-' (evita pegar "R17" quando na verdade é "R17.5"). O texto é normalizado
-' antes (vírgula->ponto, ×/*->X, espaços ao redor de R/barra/traço) para
-' bater com mais variações de formatação. Também compara contra uma versão
-' com "D" (construção diagonal, ex: "135/80D15") trocado por "R", pois a
-' Tabela de Referência às vezes só tem a variante radial cadastrada — nesse
-' caso grava o valor com "R" mesmo (como está na Referência), não o "D"
-' original da descrição.
+' (evita pegar "R17" quando na verdade e "R17.5"). O texto e normalizado
+' antes (virgula->ponto, x/*->X, espacos ao redor de R/barra/traco) para
+' bater com mais variacoes de formatacao. Tambem compara contra uma versao
+' com "D" (construcao diagonal, ex: "135/80D15") trocado por "R", pois a
+' Tabela de Referencia as vezes so tem a variante radial cadastrada -- nesse
+' caso grava o valor com "R" mesmo (como esta na Referencia), nao o "D"
+' original da descricao.
 ' ==========================================================================
-' Tamanho mínimo aceito pra um candidato de DIMENSÃO ser considerado um
-' match válido. Protege contra entradas curtas demais/corrompidas na
-' Tabela de Referência (ex: uma célula com só "R") baterem por acidente
-' em qualquer trecho da descrição e virarem resultado sem sentido — a
+' Tamanho minimo aceito pra um candidato de DIMENSAO ser considerado um
+' match valido. Protege contra entradas curtas demais/corrompidas na
+' Tabela de Referencia (ex: uma celula com so "R") baterem por acidente
+' em qualquer trecho da descricao e virarem resultado sem sentido -- a
 ' menor medida real (tipo "9R20") ainda tem pelo menos 4 caracteres.
 Const TAMANHO_MINIMO_DIMENSAO As Long = 4
 
 ' ==========================================================================
-' DE-PARA CEGO de GEOBOX — usado SÓ no modo BR/MIN (somenteMinBr = True).
+' DE-PARA CEGO de GEOBOX -- usado SO no modo BR/MIN (somenteMinBr = True).
 ' Validado num teste isolado (modTesteMatchExato) contra a base real antes
-' de virar padrão aqui: match LITERAL do valor exatamente como cadastrado na
-' Tabela de Referência dentro da descrição, sem tentar reconhecer "formato"
-' de medida (largura/perfil/aro) — só uma limpeza puramente de formatação,
-' aplicada nos DOIS lados antes de comparar: vírgula -> ponto decimal.
-' (A regra de tratar ".50" e ".5" como iguais foi removida daqui — estava
-' gerando GEOBOX errado ao juntar medidas diferentes que só coincidem depois
-' de arredondar o zero.) E o espaço é testado de duas formas (pode ser
-' decorativo OU estar no lugar de uma barra que faltou): espaço removido, e
-' espaço virando "/". Nunca inventa nem adivinha — só bate se existir
-' exatamente (depois dessa limpeza) no dicionário da Tabela de Referência.
+' de virar padrao aqui: match LITERAL do valor exatamente como cadastrado na
+' Tabela de Referencia dentro da descricao, sem tentar reconhecer "formato"
+' de medida (largura/perfil/aro) -- so uma limpeza puramente de formatacao,
+' aplicada nos DOIS lados antes de comparar: virgula -> ponto decimal.
+' (A regra de tratar ".50" e ".5" como iguais foi removida daqui -- estava
+' gerando GEOBOX errado ao juntar medidas diferentes que so coincidem depois
+' de arredondar o zero.) E o espaco e testado de duas formas (pode ser
+' decorativo OU estar no lugar de uma barra que faltou): espaco removido, e
+' espaco virando "/". Nunca inventa nem adivinha -- so bate se existir
+' exatamente (depois dessa limpeza) no dicionario da Tabela de Referencia.
 ' ==========================================================================
 
 Function ExtrairDimensao(descricao As String, marca As String, _
@@ -51,22 +51,22 @@ Function ExtrairDimensao(descricao As String, marca As String, _
     Dim textoNorm As String
     textoNorm = NormalizarTextoDimensao(descricao, somenteMinBr)
 
-    ' --- Segunda versão do texto, com TODOS os espaços removidos. Cobre   ---
-    ' --- casos como "245/35 ZR19" (espaço antes do Z, escapa da regra de  ---
-    ' --- Z/ZR/ZRF que exige dígito colado) ou até números quebrados por   ---
+    ' --- Segunda versao do texto, com TODOS os espacos removidos. Cobre   ---
+    ' --- casos como "245/35 ZR19" (espaco antes do Z, escapa da regra de  ---
+    ' --- Z/ZR/ZRF que exige digito colado) ou ate numeros quebrados por   ---
     ' --- engano no meio ("22 5/55R17" -> "225/55R17" depois de juntar).   ---
     ' --- Reaplica a limpeza de Z/RF depois de juntar, pra pegar casos que ---
-    ' --- só viram "dígito colado com Z/RF" depois da junção.             ---
+    ' --- so viram "digito colado com Z/RF" depois da juncao.             ---
     Dim textoSemEspaco As String
     textoSemEspaco = Replace(textoNorm, " ", "")
     textoSemEspaco = NormalizarFormatacaoBasica(textoSemEspaco)
 
-    ' --- Medidas escritas por extenso (laudos INMETRO, "BANDA/SÉRIE/ARO" ---
-    ' --- em vários formatos) — lógica isolada em modDimensaoExtenso pra   ---
-    ' --- poder evoluir/reverter sem mexer na extração já validada. Só    ---
-    ' --- ACRESCENTA o candidato montado ao texto de busca; a validação   ---
-    ' --- (existe no catálogo? tamanho mínimo?) continua sendo feita nos  ---
-    ' --- mesmos laços abaixo, como qualquer outro trecho da descrição.   ---
+    ' --- Medidas escritas por extenso (laudos INMETRO, "BANDA/SERIE/ARO" ---
+    ' --- em varios formatos) -- logica isolada em modDimensaoExtenso pra   ---
+    ' --- poder evoluir/reverter sem mexer na extracao ja validada. So    ---
+    ' --- ACRESCENTA o candidato montado ao texto de busca; a validacao   ---
+    ' --- (existe no catalogo? tamanho minimo?) continua sendo feita nos  ---
+    ' --- mesmos lacos abaixo, como qualquer outro trecho da descricao.   ---
     Dim candidatoExtenso As String
     candidatoExtenso = ExtrairDimensaoPorExtenso(descricao, somenteMinBr)
     If Len(candidatoExtenso) > 0 Then
@@ -74,12 +74,12 @@ Function ExtrairDimensao(descricao As String, marca As String, _
         textoSemEspaco = textoSemEspaco & Replace(candidatoExtenso, " ", "")
     End If
 
-    ' --- Versões com "D" (construção diagonal) trocado por "R", só para   ---
-    ' --- efeito de COMPARAÇÃO com o catálogo. Existem aros com construção ---
-    ' --- diagonal na descrição (ex: "135/80D15") cujo cadastro na Tabela  ---
-    ' --- de Referência só tem a variante radial ("135/80R15") — sem isso, ---
-    ' --- esses aros nunca seriam encontrados. Não reaplica em nenhum      ---
-    ' --- outro lugar do código (marca, gama etc.), só nesta comparação.   ---
+    ' --- Versoes com "D" (construcao diagonal) trocado por "R", so para   ---
+    ' --- efeito de COMPARACAO com o catalogo. Existem aros com construcao ---
+    ' --- diagonal na descricao (ex: "135/80D15") cujo cadastro na Tabela  ---
+    ' --- de Referencia so tem a variante radial ("135/80R15") -- sem isso, ---
+    ' --- esses aros nunca seriam encontrados. Nao reaplica em nenhum      ---
+    ' --- outro lugar do codigo (marca, gama etc.), so nesta comparacao.   ---
     Dim textoNormDparaR As String, textoSemEspacoDparaR As String
     textoNormDparaR = Replace(textoNorm, "D", "R")
     textoSemEspacoDparaR = Replace(textoSemEspaco, "D", "R")
@@ -88,9 +88,9 @@ Function ExtrairDimensao(descricao As String, marca As String, _
     melhor = ""
     melhorLen = 0
 
-    ' --- Passo 0: DE-PARA cego — SÓ no modo BR/MIN --- Fora desse modo, a
-    ' --- extração continua 100% igual à que já funciona (busca literal por ---
-    ' --- substring abaixo), sem nenhuma mudança de comportamento.          ---
+    ' --- Passo 0: DE-PARA cego -- SO no modo BR/MIN --- Fora desse modo, a
+    ' --- extracao continua 100% igual a que ja funciona (busca literal por ---
+    ' --- substring abaixo), sem nenhuma mudanca de comportamento.          ---
     If somenteMinBr Then
         Dim descComPonto As String
         descComPonto = Replace(descricao, ",", ".")
@@ -118,13 +118,13 @@ Function ExtrairDimensao(descricao As String, marca As String, _
     End If
 
     ' --- Medidas conhecidas DAQUELA marca E busca ampla (qualquer marca) ---
-    ' IMPORTANTE: as duas buscas SEMPRE rodam, contra as DUAS versões do
-    ' texto (normal e sem espaço), e fica com a mais longa entre todas —
+    ' IMPORTANTE: as duas buscas SEMPRE rodam, contra as DUAS versoes do
+    ' texto (normal e sem espaco), e fica com a mais longa entre todas --
     ' nunca aceita cegamente o que a busca por marca achar primeiro.
-    ' Isso evita que uma medida catalogada pra aquela marca, mas SEM relação
-    ' com o produto da linha, bata por coincidência em algum trecho solto da
-    ' descrição (números de registro, certificado, código de família etc.)
-    ' e "roube" a vaga de uma medida mais longa e mais correta que só
+    ' Isso evita que uma medida catalogada pra aquela marca, mas SEM relacao
+    ' com o produto da linha, bata por coincidencia em algum trecho solto da
+    ' descricao (numeros de registro, certificado, codigo de familia etc.)
+    ' e "roube" a vaga de uma medida mais longa e mais correta que so
     ' apareceria na busca ampla (cadastrada sob outra marca).
     If Len(marca) > 0 Then
         If dicGeoboxPorMarca.Exists(marca) Then
@@ -148,12 +148,12 @@ Function ExtrairDimensao(descricao As String, marca As String, _
         End If
     End If
 
-    ' --- Busca ampla em qualquer medida conhecida (Tabela de Referência) ---
-    ' --- Só fora de BR/MIN: em BR/MIN, o Passo 0 (DE-PARA cego, acima) já    ---
+    ' --- Busca ampla em qualquer medida conhecida (Tabela de Referencia) ---
+    ' --- So fora de BR/MIN: em BR/MIN, o Passo 0 (DE-PARA cego, acima) ja    ---
     ' --- varreu esse MESMO dicGeoboxGlobalUnicos inteiro pra achar o melhor ---
-    ' --- match; repetir a varredura aqui (com 4 InStr por item) é trabalho  ---
-    ' --- em dobro por linha — e com milhares de GEOBOX únicos numa base     ---
-    ' --- BR/MIN, isso é o que deixava a macro lentíssima/travando.          ---
+    ' --- match; repetir a varredura aqui (com 4 InStr por item) e trabalho  ---
+    ' --- em dobro por linha -- e com milhares de GEOBOX unicos numa base     ---
+    ' --- BR/MIN, isso e o que deixava a macro lentissima/travando.          ---
     If Not somenteMinBr Then
         Dim chaveG As Variant
         For Each chaveG In dicGeoboxGlobalUnicos.Keys
@@ -176,7 +176,7 @@ Function ExtrairDimensao(descricao As String, marca As String, _
         Exit Function
     End If
 
-    ' --- Passo 3: lista específica vinda da macro legada (padrão -> valor oficial) ---
+    ' --- Passo 3: lista especifica vinda da macro legada (padrao -> valor oficial) ---
     Dim chaveL As Variant
     For Each chaveL In dicPadroesLegado.Keys
         If Len(CStr(chaveL)) >= TAMANHO_MINIMO_DIMENSAO Then
@@ -196,44 +196,44 @@ Function ExtrairDimensao(descricao As String, marca As String, _
 End Function
 
 ' ==========================================================================
-' Normalização BÁSICA de formatação (compartilhada): maiúsculas, vírgula
-' decimal -> ponto, ×/* -> X, colapsa espaços soltos ao redor de R/barra/
-' traço. Usada tanto no texto da descrição quanto nos valores de GEOBOX
-' lidos da própria Tabela de Referência — os DOIS lados da comparação
-' precisam estar no mesmo formato, senão "175/75 R13" (com espaço, na
-' tabela) nunca bate com "175/75R13" (sem espaço, já limpo na descrição).
+' Normalizacao BASICA de formatacao (compartilhada): maiusculas, virgula
+' decimal -> ponto, x/* -> X, colapsa espacos soltos ao redor de R/barra/
+' traco. Usada tanto no texto da descricao quanto nos valores de GEOBOX
+' lidos da propria Tabela de Referencia -- os DOIS lados da comparacao
+' precisam estar no mesmo formato, senao "175/75 R13" (com espaco, na
+' tabela) nunca bate com "175/75R13" (sem espaco, ja limpo na descricao).
 '
-' PERFORMANCE: os dois objetos RegExp usados aqui são cacheados com Static
-' (criados uma única vez por sessão do Excel, não a cada chamada). Essa
-' função roda várias vezes por linha, em toda a base — recriar o objeto
-' COM do RegExp a cada chamada (como era antes) é um dos maiores custos
-' de desempenho do laço principal. O padrão/comportamento do regex não
-' muda: só o objeto passa a ser reaproveitado.
+' PERFORMANCE: os dois objetos RegExp usados aqui sao cacheados com Static
+' (criados uma unica vez por sessao do Excel, nao a cada chamada). Essa
+' funcao roda varias vezes por linha, em toda a base -- recriar o objeto
+' COM do RegExp a cada chamada (como era antes) e um dos maiores custos
+' de desempenho do laco principal. O padrao/comportamento do regex nao
+' muda: so o objeto passa a ser reaproveitado.
 ' ==========================================================================
 Function NormalizarFormatacaoBasica(texto As String) As String
     Dim resultado As String
     resultado = UCase(texto)
 
     resultado = Replace(resultado, ",", ".")
-    resultado = Replace(resultado, ChrW(215), "X") ' × (sinal de multiplicação, U+00D7)
+    resultado = Replace(resultado, ChrW(215), "X") ' x (sinal de multiplicacao, U+00D7)
     resultado = Replace(resultado, Chr(215), "X")   ' fallback caso venha como ANSI
     resultado = Replace(resultado, "*", "X")
 
-    ' Traços "parecidos" com hífen, mas que são caracteres Unicode diferentes
-    ' (comuns em texto colado de Excel/Word/PDF) — todos viram o hífen comum
+    ' Tracos "parecidos" com hifen, mas que sao caracteres Unicode diferentes
+    ' (comuns em texto colado de Excel/Word/PDF) -- todos viram o hifen comum
     ' "-" (U+002D). Sem isso, um GEOBOX como "33X12-20/7.50" registrado com
-    ' um desses traços nunca bate com a mesma medida digitada com hífen
-    ' normal na descrição (ou vice-versa), mesmo sendo visualmente idênticos.
+    ' um desses tracos nunca bate com a mesma medida digitada com hifen
+    ' normal na descricao (ou vice-versa), mesmo sendo visualmente identicos.
     resultado = Replace(resultado, ChrW(8211), "-") ' en dash (U+2013)
     resultado = Replace(resultado, ChrW(8212), "-") ' em dash (U+2014)
     resultado = Replace(resultado, ChrW(8722), "-") ' sinal de menos matematico (U+2212)
     resultado = Replace(resultado, ChrW(8209), "-") ' hifen nao separavel (U+2011)
-    ' Espaço não separável (U+00A0) -> espaço comum, pra não escapar das
-    ' regras de colapso de espaço logo abaixo.
+    ' Espaco nao separavel (U+00A0) -> espaco comum, pra nao escapar das
+    ' regras de colapso de espaco logo abaixo.
     resultado = Replace(resultado, ChrW(160), " ")
 
     Dim i As Long
-    For i = 1 To 3 ' algumas passadas pra colapsar espaços múltiplos
+    For i = 1 To 3 ' algumas passadas pra colapsar espacos multiplos
         resultado = Replace(resultado, " R", "R")
         resultado = Replace(resultado, "R ", "R")
         resultado = Replace(resultado, " /", "/")
@@ -242,10 +242,10 @@ Function NormalizarFormatacaoBasica(texto As String) As String
         resultado = Replace(resultado, "- ", "-")
     Next i
 
-    ' Remove o "Z" de índices de velocidade embutidos no meio da medida
-    ' (ZR, ZRF, Z sozinho) — "205/55ZR16" / "205/55ZRF16" / "205/55Z16"
-    ' viram todos "205/55R16". Só troca quando está exatamente entre dois
-    ' dígitos (perfil e aro), pra não mexer em "Z" de nome de marca/gama.
+    ' Remove o "Z" de indices de velocidade embutidos no meio da medida
+    ' (ZR, ZRF, Z sozinho) -- "205/55ZR16" / "205/55ZRF16" / "205/55Z16"
+    ' viram todos "205/55R16". So troca quando esta exatamente entre dois
+    ' digitos (perfil e aro), pra nao mexer em "Z" de nome de marca/gama.
     On Error Resume Next
     Static regexZ As Object
     If regexZ Is Nothing Then
@@ -257,8 +257,8 @@ Function NormalizarFormatacaoBasica(texto As String) As String
     resultado = regexZ.Replace(resultado, "$1R$2")
 
     ' Remove o "F" de pneus Run Flat quando vem colado no R, SEM "Z" na
-    ' frente — "235/50RF18" (RunFlat) vira "235/50R18". Mesma regra: só
-    ' troca quando está exatamente entre dois dígitos.
+    ' frente -- "235/50RF18" (RunFlat) vira "235/50R18". Mesma regra: so
+    ' troca quando esta exatamente entre dois digitos.
     Static regexRF As Object
     If regexRF Is Nothing Then
         Set regexRF = CreateObject("VBScript.RegExp")
@@ -273,18 +273,18 @@ Function NormalizarFormatacaoBasica(texto As String) As String
 End Function
 
 ' ==========================================================================
-' Normaliza o texto para a busca de DIMENSÃO/GEOBOX, cobrindo variações de
-' formatação vistas na macro legada:
-'   - vírgula decimal -> ponto ("22,5" -> "22.5")
-'   - "×" ou "*" no lugar de "X" ("31×10.50R15" / "31*10.5R15" -> "31X10.5R15")
-'   - espaços ao redor de "R", "/" e "-" ("215/ 75R17.5" -> "215/75R17.5")
-'   - padrão textual "NNN E ARO NN,N" -> "NNN/80RNN.N" (assume perfil 80,
+' Normaliza o texto para a busca de DIMENSAO/GEOBOX, cobrindo variacoes de
+' formatacao vistas na macro legada:
+'   - virgula decimal -> ponto ("22,5" -> "22.5")
+'   - "x" ou "*" no lugar de "X" ("31x10.50R15" / "31*10.5R15" -> "31X10.5R15")
+'   - espacos ao redor de "R", "/" e "-" ("215/ 75R17.5" -> "215/75R17.5")
+'   - padrao textual "NNN E ARO NN,N" -> "NNN/80RNN.N" (assume perfil 80,
 '     igual fazia a macro legada nos dois casos hardcoded que ela tratava)
-' NÃO sobrescreve a descrição original — usada só internamente na extração.
+' NAO sobrescreve a descricao original -- usada so internamente na extracao.
 '
-' PERFORMANCE: um único objeto RegExp cacheado com Static (reaproveitado
+' PERFORMANCE: um unico objeto RegExp cacheado com Static (reaproveitado
 ' entre chamadas, com o Pattern trocado antes de cada uso) no lugar de
-' recriar 1 a 3 objetos COM a cada chamada — mesmo comportamento, chamada
+' recriar 1 a 3 objetos COM a cada chamada -- mesmo comportamento, chamada
 ' bem mais barata (roda uma vez por linha, em toda a base).
 ' ==========================================================================
 Function NormalizarTextoDimensao(texto As String, Optional somenteMinBr As Boolean = False) As String
@@ -299,29 +299,29 @@ Function NormalizarTextoDimensao(texto As String, Optional somenteMinBr As Boole
         regex.IgnoreCase = True
     End If
 
-    ' Padrão "NNN E ARO NN,N" -> "NNN/80RNN.N" (assume perfil 80)
+    ' Padrao "NNN E ARO NN,N" -> "NNN/80RNN.N" (assume perfil 80)
     regex.Pattern = "(\d{3})\s*E\s*ARO\s*(\d{2}(?:\.\d)?)"
     resultado = regex.Replace(resultado, "$1/80R$2")
 
-    ' As duas regras de hífen abaixo assumem que "-" numa medida é sempre
-    ' troca de digitação de "X" ou "/". Em bases BR/MIN existem GEOBOX com
-    ' "-" que são válidos como estão (ex: "7.50-16", "9.00-20") — nelas essa
-    ' suposição não vale, então as duas ficam desligadas nesse modo.
+    ' As duas regras de hifen abaixo assumem que "-" numa medida e sempre
+    ' troca de digitacao de "X" ou "/". Em bases BR/MIN existem GEOBOX com
+    ' "-" que sao validos como estao (ex: "7.50-16", "9.00-20") -- nelas essa
+    ' suposicao nao vale, entao as duas ficam desligadas nesse modo.
     If Not somenteMinBr Then
-        ' Padrão "NN-NN.NNRNN" (hífen no lugar de "X", ex: "33-12.50R17") ->
-        ' "NNXNN.NNRNN". Só aplica quando "R" vem logo depois do decimal, pra
-        ' não confundir com o padrão "N.NN-NN" (ex: "9.00-20", onde o hífen faz
-        ' o papel do "R" final, tratado depois pela troca hífen->R na gravação).
+        ' Padrao "NN-NN.NNRNN" (hifen no lugar de "X", ex: "33-12.50R17") ->
+        ' "NNXNN.NNRNN". So aplica quando "R" vem logo depois do decimal, pra
+        ' nao confundir com o padrao "N.NN-NN" (ex: "9.00-20", onde o hifen faz
+        ' o papel do "R" final, tratado depois pela troca hifen->R na gravacao).
         regex.Pattern = "(\d{2,3})-(\d{1,2}\.\d{1,2})R"
         resultado = regex.Replace(resultado, "$1X$2R")
 
-        ' Padrão "NNN-NNRNN" (hífen no lugar de "/", ex: "255-35R19", vindo de
-        ' "255 - 35 R19" na descrição) -> "NNN/NNRNN". Só aplica quando o
-        ' segundo número é inteiro (sem decimal — esse caso já foi tratado pela
-        ' regra acima) e "R" vem logo em seguida — medida radial sempre usa "/"
-        ' entre largura e perfil, então um hífen ali só pode ser troca de
-        ' digitação. Não aplica em pneus diagonais tipo "9.00-20"/"7.50-16",
-        ' que não têm "R" colado logo depois do segundo número.
+        ' Padrao "NNN-NNRNN" (hifen no lugar de "/", ex: "255-35R19", vindo de
+        ' "255 - 35 R19" na descricao) -> "NNN/NNRNN". So aplica quando o
+        ' segundo numero e inteiro (sem decimal -- esse caso ja foi tratado pela
+        ' regra acima) e "R" vem logo em seguida -- medida radial sempre usa "/"
+        ' entre largura e perfil, entao um hifen ali so pode ser troca de
+        ' digitacao. Nao aplica em pneus diagonais tipo "9.00-20"/"7.50-16",
+        ' que nao tem "R" colado logo depois do segundo numero.
         regex.Pattern = "(\d{2,3})-(\d{2,3})R"
         resultado = regex.Replace(resultado, "$1/$2R")
     End If
@@ -331,8 +331,8 @@ SemRegex:
 End Function
 
 ' ==========================================================================
-' Extrai o ARO (mesma lógica da macro ARO() original) — cheque formatos
-' decimais (R17.5, R19.5, R22.5, R24.5) ANTES dos inteiros para não dar
+' Extrai o ARO (mesma logica da macro ARO() original) -- cheque formatos
+' decimais (R17.5, R19.5, R22.5, R24.5) ANTES dos inteiros para nao dar
 ' match parcial errado (ex: "R17" dentro de "R17.5").
 ' ==========================================================================
 Function ExtrairAro(texto As String) As String

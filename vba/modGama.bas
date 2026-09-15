@@ -3,15 +3,15 @@ Option Explicit
 
 ' ==========================================================================
 ' MODULO: modGama
-' Extração da coluna GAMA a partir da DESCRIÇÃODA MERCADORIA.
-' Mesmo modelo de modMarca.bas: exceções/abreviações primeiro (aba
-' "ExcecoesGama" — ex: "PTNZ" -> "POTENZA", "TRNZ" -> "TURANZA"), depois
-' busca pelo nome completo (ou por palavra-chave) da gama na descrição.
+' Extracao da coluna GAMA a partir da DESCRICAODA MERCADORIA.
+' Mesmo modelo de modMarca.bas: excecoes/abreviacoes primeiro (aba
+' "ExcecoesGama" -- ex: "PTNZ" -> "POTENZA", "TRNZ" -> "TURANZA"), depois
+' busca pelo nome completo (ou por palavra-chave) da gama na descricao.
 ' ==========================================================================
 
 ' ==========================================================================
-' Normaliza texto SÓ para efeito de comparação (nunca é gravado): remove
-' espaço, barra, hífen e ponto, e coloca em maiúsculas.
+' Normaliza texto SO para efeito de comparacao (nunca e gravado): remove
+' espaco, barra, hifen e ponto, e coloca em maiusculas.
 ' ==========================================================================
 Private Function NormalizarParaComparacao(texto As String) As String
     Dim resultado As String
@@ -24,10 +24,10 @@ Private Function NormalizarParaComparacao(texto As String) As String
 End Function
 
 ' ==========================================================================
-' Mesma normalização de NormalizarParaComparacao, mas MANTÉM o espaço — só
-' pra alimentar o teste de limite de palavra/número (\b) em candidatos
+' Mesma normalizacao de NormalizarParaComparacao, mas MANTEM o espaco -- so
+' pra alimentar o teste de limite de palavra/numero (\b) em candidatos
 ' "arriscados" (ver CandidatoGamaArriscado/CandidatoGamaBate). Remover o
-' espaço (como a versão normal faz) grudaria palavras que estavam separadas
+' espaco (como a versao normal faz) grudaria palavras que estavam separadas
 ' no texto original, destruindo a fronteira que o \b precisa enxergar.
 ' ==========================================================================
 Private Function NormalizarParaComparacaoComEspaco(texto As String) As String
@@ -41,9 +41,9 @@ End Function
 
 ' ==========================================================================
 ' Conta quantas PALAVRAS de um nome de gama (candidato) aparecem na
-' descrição já normalizada. Quebra o candidato em palavras por espaço, "/",
+' descricao ja normalizada. Quebra o candidato em palavras por espaco, "/",
 ' "-" e "." (ex: "FORZA H/T2" -> "FORZA", "H", "T2") e ignora palavras
-' curtas demais (< 4 caracteres) pra não confiar num match tipo "AT" ou
+' curtas demais (< 4 caracteres) pra nao confiar num match tipo "AT" ou
 ' "H" sozinho, que apareceria em qualquer texto por acaso.
 ' ==========================================================================
 Private Function ContarPalavrasBatendo(candidato As String, descNorm As String) As Long
@@ -70,7 +70,7 @@ End Function
 
 ' ==========================================================================
 ' Varre uma lista de candidatos de GAMA (Collection ou array de chaves de
-' Dictionary) e devolve o que tiver MAIS palavras batendo na descrição
+' Dictionary) e devolve o que tiver MAIS palavras batendo na descricao
 ' (desempate: nome de gama mais longo). Devolve "" se nenhum candidato
 ' teve nenhuma palavra batendo.
 ' ==========================================================================
@@ -101,12 +101,12 @@ Private Function BuscarGamaPorPalavraChave(candidatos As Variant, descNorm As St
 End Function
 
 ' ==========================================================================
-' Verifica se um candidato de GAMA já normalizado (NormalizarParaComparacao)
-' é "arriscado" o suficiente pra exigir limite de palavra/número na
-' comparação: curto (<= 4 caracteres) ou puramente numérico. Nomes de gama
-' assim colidem fácil com número solto no texto (medida em mm, capacidade
-' de carga, código de peça...) — ex: gama "520" batendo dentro de
-' "1.520MM". Só usado em modo BR/MIN (ver ExtrairGama).
+' Verifica se um candidato de GAMA ja normalizado (NormalizarParaComparacao)
+' e "arriscado" o suficiente pra exigir limite de palavra/numero na
+' comparacao: curto (<= 4 caracteres) ou puramente numerico. Nomes de gama
+' assim colidem facil com numero solto no texto (medida em mm, capacidade
+' de carga, codigo de peca...) -- ex: gama "520" batendo dentro de
+' "1.520MM". So usado em modo BR/MIN (ver ExtrairGama).
 ' ==========================================================================
 Private Function CandidatoGamaArriscado(candidatoNorm As String) As Boolean
     If Len(candidatoNorm) <= 4 Then
@@ -114,10 +114,10 @@ Private Function CandidatoGamaArriscado(candidatoNorm As String) As Boolean
         Exit Function
     End If
 
-    ' --- Regex cacheado (Static) — criar um objeto VBScript.RegExp novo a  ---
-    ' --- cada chamada é caro, e essa função roda pra CADA candidato de     ---
-    ' --- gama, em CADA linha da planilha. Sem cache, isso sozinho já       ---
-    ' --- travava/deixava a macro lentíssima em bases grandes.              ---
+    ' --- Regex cacheado (Static) -- criar um objeto VBScript.RegExp novo a  ---
+    ' --- cada chamada e caro, e essa funcao roda pra CADA candidato de     ---
+    ' --- gama, em CADA linha da planilha. Sem cache, isso sozinho ja       ---
+    ' --- travava/deixava a macro lentissima em bases grandes.              ---
     Static regexSoDigitos As Object
     If regexSoDigitos Is Nothing Then
         Set regexSoDigitos = CreateObject("VBScript.RegExp")
@@ -127,9 +127,9 @@ Private Function CandidatoGamaArriscado(candidatoNorm As String) As Boolean
 End Function
 
 ' ==========================================================================
-' Escapa caracteres especiais de regex num texto literal (mesma lógica de
-' modMarca.EscaparRegex, duplicada aqui pra não criar dependência cruzada
-' entre módulos por uma função tão pequena).
+' Escapa caracteres especiais de regex num texto literal (mesma logica de
+' modMarca.EscaparRegex, duplicada aqui pra nao criar dependencia cruzada
+' entre modulos por uma funcao tao pequena).
 ' ==========================================================================
 Private Function EscaparRegexGama(texto As String) As String
     Dim especiais As String
@@ -149,11 +149,11 @@ Private Function EscaparRegexGama(texto As String) As String
 End Function
 
 ' ==========================================================================
-' Testa se um candidato bate — substring livre no texto SEM espaço
+' Testa se um candidato bate -- substring livre no texto SEM espaco
 ' (descNorm, igual sempre foi), OU, se o candidato for "arriscado" (curto/
-' numérico) E somenteMinBr, exigindo limite de palavra/número (\b) nos dois
-' lados — testado contra descComEspaco (só maiúscula + remove barra/traço/
-' ponto, MANTÉM espaço), porque descNorm já removeu os espaços e grudaria
+' numerico) E somenteMinBr, exigindo limite de palavra/numero (\b) nos dois
+' lados -- testado contra descComEspaco (so maiuscula + remove barra/traco/
+' ponto, MANTEM espaco), porque descNorm ja removeu os espacos e grudaria
 ' duas palavras que estavam separadas no texto original (ex: "RODAGEM
 ' VSDL" -> "RODAGEMVSDL"), destruindo a fronteira que o \b precisa achar.
 ' ==========================================================================
@@ -174,12 +174,12 @@ End Function
 
 ' ==========================================================================
 ' Varre uma lista de candidatos de GAMA (Collection ou array de chaves de
-' Dictionary) comparando o nome completo (normalizado) contra a descrição, e
-' devolve o que BATER e for o MAIS LONGO entre todos — não o primeiro que
-' bater (a ordem de iteração de um Dictionary é arbitrária, então "ficar no
+' Dictionary) comparando o nome completo (normalizado) contra a descricao, e
+' devolve o que BATER e for o MAIS LONGO entre todos -- nao o primeiro que
+' bater (a ordem de iteracao de um Dictionary e arbitraria, entao "ficar no
 ' primeiro" deixava uma gama curta/coincidente vencer uma mais longa e
-' correta só por sorte de ordenação). Em modo BR/MIN, candidatos curtos/
-' numéricos (ver CandidatoGamaArriscado) só contam com limite de palavra.
+' correta so por sorte de ordenacao). Em modo BR/MIN, candidatos curtos/
+' numericos (ver CandidatoGamaArriscado) so contam com limite de palavra.
 ' Devolve "" se nenhum candidato bateu.
 ' ==========================================================================
 Private Function BuscarGamaPorNomeCompleto(candidatos As Variant, descNorm As String, descComEspaco As String, somenteMinBr As Boolean) As String
@@ -207,36 +207,36 @@ Private Function BuscarGamaPorNomeCompleto(candidatos As Variant, descNorm As St
 End Function
 
 ' ==========================================================================
-' Extrai a GAMA em camadas, da mais confiável pra mais permissiva:
-'   1) Exceções/abreviações (dicExcecoesGama, aba "ExcecoesGama").
-'   2) Nome completo da gama (normalizado contra espaço/barra/hífen/ponto),
-'      primeiro só entre as gamas DAQUELA marca, depois busca ampla — fica
-'      com o match MAIS LONGO entre as candidatas, não o primeiro que bater
+' Extrai a GAMA em camadas, da mais confiavel pra mais permissiva:
+'   1) Excecoes/abreviacoes (dicExcecoesGama, aba "ExcecoesGama").
+'   2) Nome completo da gama (normalizado contra espaco/barra/hifen/ponto),
+'      primeiro so entre as gamas DAQUELA marca, depois busca ampla -- fica
+'      com o match MAIS LONGO entre as candidatas, nao o primeiro que bater
 '      (ver BuscarGamaPorNomeCompleto).
-'   3) Se não achou nada assim, cai numa busca por PALAVRA-CHAVE: quebra
-'      cada gama conhecida em palavras e vê se pelo menos uma (>= 4
-'      caracteres) aparece na descrição — primeiro só nas gamas da marca já
+'   3) Se nao achou nada assim, cai numa busca por PALAVRA-CHAVE: quebra
+'      cada gama conhecida em palavras e ve se pelo menos uma (>= 4
+'      caracteres) aparece na descricao -- primeiro so nas gamas da marca ja
 '      identificada, depois busca ampla. Mais permissivo, mas escala melhor
-'      que ficar caçando exceção de pontuação linha por linha; se overmatch
-'      demais em algum caso real, dá pra restringir de volta esse passo.
+'      que ficar cacando excecao de pontuacao linha por linha; se overmatch
+'      demais em algum caso real, da pra restringir de volta esse passo.
 ' Se nada bateu em nenhuma camada, retorna "".
 '
-' GAMA é tratada como praticamente exclusiva de uma marca: sempre que ela é
-' descoberta (em qualquer camada acima) e a MARCA da linha ainda está
-' vazia, a marca é preenchida também (ByRef) com a dona daquela gama
-' (dicMarcaPorGama, montado em modReferencia a partir da própria Tabela de
-' Referência).
+' GAMA e tratada como praticamente exclusiva de uma marca: sempre que ela e
+' descoberta (em qualquer camada acima) e a MARCA da linha ainda esta
+' vazia, a marca e preenchida tambem (ByRef) com a dona daquela gama
+' (dicMarcaPorGama, montado em modReferencia a partir da propria Tabela de
+' Referencia).
 '
-' somenteMinBr: em BR/MIN, a camada 2 exige limite de palavra/número pra
-' candidatas curtas (<=4 caracteres) ou puramente numéricas — evita que uma
-' gama tipo "520" bata só por estar dentro de "1.520MM". Fora de BR/MIN,
-' mantém o comportamento antigo (substring livre) em toda a camada 2.
+' somenteMinBr: em BR/MIN, a camada 2 exige limite de palavra/numero pra
+' candidatas curtas (<=4 caracteres) ou puramente numericas -- evita que uma
+' gama tipo "520" bata so por estar dentro de "1.520MM". Fora de BR/MIN,
+' mantem o comportamento antigo (substring livre) em toda a camada 2.
 '
-' Em BR/MIN, GAMA só é procurada se a MARCA da linha já tiver sido
-' encontrada antes (marca não vazia) — uma gama "solta" sem marca conhecida
-' tende a ser falso positivo (número da descrição batendo com gama numérica
-' tipo "550", ou palavra-chave genérica tipo "FLORESTAL" sem ligação real
-' com nenhuma marca confirmada). Fora de BR/MIN, mantém o comportamento
+' Em BR/MIN, GAMA so e procurada se a MARCA da linha ja tiver sido
+' encontrada antes (marca nao vazia) -- uma gama "solta" sem marca conhecida
+' tende a ser falso positivo (numero da descricao batendo com gama numerica
+' tipo "550", ou palavra-chave generica tipo "FLORESTAL" sem ligacao real
+' com nenhuma marca confirmada). Fora de BR/MIN, mantem o comportamento
 ' antigo (procura mesmo com marca vazia).
 ' ==========================================================================
 Function ExtrairGama(descricao As String, ByRef marca As String, _
@@ -255,7 +255,7 @@ Function ExtrairGama(descricao As String, ByRef marca As String, _
     Dim descComEspaco As String
     descComEspaco = NormalizarParaComparacaoComEspaco(descricao)
 
-    ' --- Camada 1: exceções/abreviações ---
+    ' --- Camada 1: excecoes/abreviacoes ---
     Dim chaveExc As Variant
     For Each chaveExc In dicExcecoesGama.Keys
         If InStr(1, descricao, CStr(chaveExc), vbTextCompare) > 0 Then

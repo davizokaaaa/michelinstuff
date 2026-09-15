@@ -8,9 +8,9 @@ Option Explicit
 ' ==========================================================================
 
 ' ==========================================================================
-' Retorna a maior "última linha com dado" entre um conjunto de colunas,
-' para não depender de uma única coluna (que pode estar vazia por acaso
-' nas últimas linhas, ou por causa de reordenação de colunas).
+' Retorna a maior "ultima linha com dado" entre um conjunto de colunas,
+' para nao depender de uma unica coluna (que pode estar vazia por acaso
+' nas ultimas linhas, ou por causa de reordenacao de colunas).
 ' ==========================================================================
 Function UltimaLinhaEntreColunas(ws As Worksheet, colunas As Variant) As Long
     Dim maiorLinha As Long, linhaAtual As Long, i As Long
@@ -28,7 +28,7 @@ End Function
 
 ' ==========================================================================
 ' Como LocalizarColuna, mas aceita uma lista de nomes alternativos para o
-' mesmo cabeçalho (ex: DIMENSÃO ou GEOBOX). Retorna a primeira que achar.
+' mesmo cabecalho (ex: DIMENSAO ou GEOBOX). Retorna a primeira que achar.
 ' ==========================================================================
 Function LocalizarColunaAlternativas(ws As Worksheet, nomes As Variant) As Long
     Dim i As Long, resultado As Long
@@ -65,9 +65,9 @@ Function LocalizarColunaAlternativasOuCriar(ws As Worksheet, nomes As Variant, n
 End Function
 
 ' ==========================================================================
-' Localiza a coluna pelo cabeçalho; se não existir, CRIA uma nova coluna
-' na primeira posição vazia à direita dos dados e escreve o cabeçalho nela.
-' Usada para as colunas de SAÍDA, que a macro tem autonomia para criar.
+' Localiza a coluna pelo cabecalho; se nao existir, CRIA uma nova coluna
+' na primeira posicao vazia a direita dos dados e escreve o cabecalho nela.
+' Usada para as colunas de SAIDA, que a macro tem autonomia para criar.
 ' ==========================================================================
 Function LocalizarOuCriarColuna(ws As Worksheet, nomeColuna As String) As Long
     Dim resultado As Long
@@ -86,21 +86,21 @@ Function LocalizarOuCriarColuna(ws As Worksheet, nomeColuna As String) As Long
 End Function
 
 ' ==========================================================================
-' Normaliza texto para comparação de cabeçalhos: maiúsculas, só letras A-Z
-' e dígitos 0-9 — QUALQUER outro caractere (espaço, acento, cedilha, barra,
-' hífen, símbolo) é descartado.
+' Normaliza texto para comparacao de cabecalhos: maiusculas, so letras A-Z
+' e digitos 0-9 -- QUALQUER outro caractere (espaco, acento, cedilha, barra,
+' hifen, simbolo) e descartado.
 '
-' CORREÇÃO: a versão anterior tentava mapear cada acento conhecido (Á, Ã,
-' Ç...) para a letra sem acento. Isso quebra na prática porque o texto
+' CORRECAO: a versao anterior tentava mapear cada acento conhecido (A, A,
+' C...) para a letra sem acento. Isso quebra na pratica porque o texto
 ' colado no VBA Editor pode corromper acentos de formas diferentes conforme
-' o caminho que o texto percorreu (copiar/colar, salvar, reabrir) — os
-' bytes que sobram nem sempre são os mesmos caracteres que o mapa espera,
-' então a substituição simplesmente não acontecia e a coluna não era
-' encontrada (mesmo ela existindo, com o nome "certo", no cabeçalho real).
+' o caminho que o texto percorreu (copiar/colar, salvar, reabrir) -- os
+' bytes que sobram nem sempre sao os mesmos caracteres que o mapa espera,
+' entao a substituicao simplesmente nao acontecia e a coluna nao era
+' encontrada (mesmo ela existindo, com o nome "certo", no cabecalho real).
 ' Descartar QUALQUER caractere fora de A-Z/0-9 (em vez de tentar adivinhar
-' qual acento é qual) resolve isso na raiz: não importa como "DESCRIÇÃO"
+' qual acento e qual) resolve isso na raiz: nao importa como "DESCRICAO"
 ' corrompeu, o "esqueleto" de letras simples (D-E-S-C-R-I...) sempre sobra
-' igual dos dois lados da comparação.
+' igual dos dois lados da comparacao.
 ' ==========================================================================
 Function NormalizarTexto(txt As String) As String
     Dim resultado As String
@@ -119,10 +119,10 @@ Function NormalizarTexto(txt As String) As String
 End Function
 
 ' ==========================================================================
-' Localiza a coluna cujo cabeçalho (linha 1) bate com o nome informado.
-' Se houver MAIS DE UMA coluna com o mesmo nome de cabeçalho (ex: uma
-' coluna vazia remanescente de reordenação), escolhe a que tiver mais
-' células preenchidas abaixo do cabeçalho — evita pegar uma coluna "fantasma".
+' Localiza a coluna cujo cabecalho (linha 1) bate com o nome informado.
+' Se houver MAIS DE UMA coluna com o mesmo nome de cabecalho (ex: uma
+' coluna vazia remanescente de reordenacao), escolhe a que tiver mais
+' celulas preenchidas abaixo do cabecalho -- evita pegar uma coluna "fantasma".
 ' ==========================================================================
 Function LocalizarColuna(ws As Worksheet, nomeColuna As String) As Long
     Dim lastCol As Long, c As Long
@@ -152,8 +152,8 @@ Function LocalizarColuna(ws As Worksheet, nomeColuna As String) As Long
 
     If qtdColunasAchadas > 1 Then
         Debug.Print "AVISO: coluna """ & nomeColuna & """ encontrada " & qtdColunasAchadas & _
-                    " vezes no cabeçalho. Escolhida a coluna " & melhorCol & _
-                    " (mais preenchida, " & melhorQtdPreenchida & " células com dado)."
+                    " vezes no cabecalho. Escolhida a coluna " & melhorCol & _
+                    " (mais preenchida, " & melhorQtdPreenchida & " celulas com dado)."
     End If
 
     LocalizarColuna = melhorCol

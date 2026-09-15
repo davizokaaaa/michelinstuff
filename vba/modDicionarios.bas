@@ -8,7 +8,7 @@ Option Explicit
 ' ==========================================================================
 
 ' ==========================================================================
-' Dicionário de montadoras (mesmo da macro OE() original)
+' Dicionario de montadoras (mesmo da macro OE() original)
 ' ==========================================================================
 Function CarregarMontadoras() As Object
     Dim dic As Object
@@ -31,7 +31,7 @@ Function CarregarMontadoras() As Object
 End Function
 
 ' ==========================================================================
-' Dicionário de marcas ANIP (mesmo da macro ANIP() original)
+' Dicionario de marcas ANIP (mesmo da macro ANIP() original)
 ' ==========================================================================
 Function CarregarMarcasAnip() As Object
     Dim dic As Object
@@ -54,11 +54,11 @@ Function CarregarMarcasAnip() As Object
 End Function
 
 ' ==========================================================================
-' Lista específica de medidas (GEOBOX) vinda da macro legada Sub dimensão():
-' cada padrão de texto observado mapeado para o valor "oficial" — inclui
-' casos hardcoded que não seguem um formato genérico (ex: "275/80" sozinho
+' Lista especifica de medidas (GEOBOX) vinda da macro legada Sub dimensao():
+' cada padrao de texto observado mapeado para o valor "oficial" -- inclui
+' casos hardcoded que nao seguem um formato generico (ex: "275/80" sozinho
 ' assume "275/80R22.5"; "13R22.5" assume "13.00R22.5"; "205R14C" vira
-' "205R14"). Usada como PASSO 3 (fonte extra) na extração de DIMENSÃO.
+' "205R14"). Usada como PASSO 3 (fonte extra) na extracao de DIMENSAO.
 ' ==========================================================================
 Function CarregarPadroesGeoboxLegado() As Object
     Dim dic As Object
