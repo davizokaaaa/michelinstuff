@@ -86,34 +86,36 @@ Function LocalizarOuCriarColuna(ws As Worksheet, nomeColuna As String) As Long
 End Function
 
 ' ==========================================================================
-' Normaliza texto para comparação de cabeçalhos: maiúsculas, sem espaços,
-' sem acentos/cedilha. Evita falhas de comparação por causa de acentos
-' que às vezes corrompem ao colar/salvar código VBA (á, é, í, ç etc.).
+' Normaliza texto para comparação de cabeçalhos: maiúsculas, só letras A-Z
+' e dígitos 0-9 — QUALQUER outro caractere (espaço, acento, cedilha, barra,
+' hífen, símbolo) é descartado.
+'
+' CORREÇÃO: a versão anterior tentava mapear cada acento conhecido (Á, Ã,
+' Ç...) para a letra sem acento. Isso quebra na prática porque o texto
+' colado no VBA Editor pode corromper acentos de formas diferentes conforme
+' o caminho que o texto percorreu (copiar/colar, salvar, reabrir) — os
+' bytes que sobram nem sempre são os mesmos caracteres que o mapa espera,
+' então a substituição simplesmente não acontecia e a coluna não era
+' encontrada (mesmo ela existindo, com o nome "certo", no cabeçalho real).
+' Descartar QUALQUER caractere fora de A-Z/0-9 (em vez de tentar adivinhar
+' qual acento é qual) resolve isso na raiz: não importa como "DESCRIÇÃO"
+' corrompeu, o "esqueleto" de letras simples (D-E-S-C-R-I...) sempre sobra
+' igual dos dois lados da comparação.
 ' ==========================================================================
 Function NormalizarTexto(txt As String) As String
     Dim resultado As String
     resultado = UCase(Trim(txt))
 
-    resultado = Replace(resultado, "Á", "A")
-    resultado = Replace(resultado, "À", "A")
-    resultado = Replace(resultado, "Ã", "A")
-    resultado = Replace(resultado, "Â", "A")
-    resultado = Replace(resultado, "É", "E")
-    resultado = Replace(resultado, "Ê", "E")
-    resultado = Replace(resultado, "Í", "I")
-    resultado = Replace(resultado, "Ó", "O")
-    resultado = Replace(resultado, "Ô", "O")
-    resultado = Replace(resultado, "Õ", "O")
-    resultado = Replace(resultado, "Ú", "U")
-    resultado = Replace(resultado, "Ü", "U")
-    resultado = Replace(resultado, "Ç", "C")
+    Dim saida As String, i As Long, c As String
+    saida = ""
+    For i = 1 To Len(resultado)
+        c = Mid(resultado, i, 1)
+        If (c >= "A" And c <= "Z") Or (c >= "0" And c <= "9") Then
+            saida = saida & c
+        End If
+    Next i
 
-    resultado = Replace(resultado, " ", "")
-    resultado = Replace(resultado, Chr(160), "") ' espaço não separável
-    resultado = Replace(resultado, "/", "")
-    resultado = Replace(resultado, "-", "")
-
-    NormalizarTexto = resultado
+    NormalizarTexto = saida
 End Function
 
 ' ==========================================================================
