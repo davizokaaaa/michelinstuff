@@ -58,17 +58,25 @@ Function CarregarTabelaReferencia(ByRef dicSegPorGeobox As Object, ByRef dicLpPo
 
     On Error GoTo ErroAbrir
 
+    ' --- Caminho declarado LOCALMENTE (nao vem mais de modConfig) -- evita  ---
+    ' --- ambiguidade de resolucao de Public Function quando ha mais de um  ---
+    ' --- VBAProject aberto ao mesmo tempo no Excel (ver nota identica em   ---
+    ' --- modMain.ClassificarTudo).                                        ---
+    Dim refFilePathLocal As String
+    refFilePathLocal = "C:\Users\E125949\OneDrive - MFP Michelin\" & _
+                        ChrW(193) & "rea de Trabalho\Teste importados\Tabela_Referencia.xlsx"
+
     Dim wbRef As Workbook
     Dim wasOpen As Boolean
     Dim wbName As String
-    wbName = Mid(REF_FILE_PATH, InStrRev(REF_FILE_PATH, "\") + 1)
+    wbName = Mid(refFilePathLocal, InStrRev(refFilePathLocal, "\") + 1)
 
     ' Reaproveita se ja estiver aberto, senao abre
     On Error Resume Next
     Set wbRef = Workbooks(wbName)
     On Error GoTo ErroAbrir
     If wbRef Is Nothing Then
-        Set wbRef = Workbooks.Open(REF_FILE_PATH, ReadOnly:=True)
+        Set wbRef = Workbooks.Open(refFilePathLocal, ReadOnly:=True)
         wasOpen = False
     Else
         wasOpen = True

@@ -52,6 +52,18 @@ Option Explicit
 
 Sub ClassificarTudo()
 
+    ' --- Valores de configuracao DECLARADOS LOCALMENTE (nao vem mais de     ---
+    ' --- modConfig) -- evita qualquer ambiguidade de resolucao de Public   ---
+    ' --- Const/Function quando ha mais de um VBAProject aberto ao mesmo    ---
+    ' --- tempo no Excel (cada projeto so enxerga sua propria copia de um   ---
+    ' --- Public symbol; se por algum motivo o Excel resolver o nome contra ---
+    ' --- outro projeto/uma copia desatualizada, da erro "Variavel nao      ---
+    ' --- definida" mesmo com o modConfig correto presente). Mesmo valor de ---
+    ' --- antes, so que sem depender de resolucao cross-module.            ---
+    Const colAdquirenteNomeLocal As String = "PROVAVEL ADQUIRENTE"
+    Const colEstepeCompNomeLocal As String = "ESTEPE/COMPETICAO"
+    Const mostrarDiagnosticoRefLocal As Boolean = True
+
     Dim ws As Worksheet
     Dim lastRow As Long, i As Long
     Dim colDescricao As Long, colAdquirente As Long
@@ -63,14 +75,14 @@ Sub ClassificarTudo()
 
     ' --- Colunas de ENTRADA: precisam existir (a macro nao pode inventar) ---
     colDescricao = LocalizarColuna(ws, "DESCRICAODA MERCADORIA")
-    colAdquirente = LocalizarColuna(ws, COL_ADQUIRENTE_NOME)
+    colAdquirente = LocalizarColuna(ws, colAdquirenteNomeLocal)
 
     If colDescricao = 0 Or colAdquirente = 0 Then
 
         Dim msgFaltantes As String
         msgFaltantes = "Nao encontrei a(s) seguinte(s) coluna(s) de ENTRADA no cabecalho (linha 1):" & vbCrLf & vbCrLf
         If colDescricao = 0 Then msgFaltantes = msgFaltantes & "- DESCRICAODA MERCADORIA" & vbCrLf
-        If colAdquirente = 0 Then msgFaltantes = msgFaltantes & "- " & COL_ADQUIRENTE_NOME & vbCrLf
+        If colAdquirente = 0 Then msgFaltantes = msgFaltantes & "- " & colAdquirenteNomeLocal & vbCrLf
 
         msgFaltantes = msgFaltantes & vbCrLf & "Cabecalhos encontrados na linha 1:" & vbCrLf
         Dim lastColDiag As Long, cDiag As Long
@@ -95,7 +107,7 @@ Sub ClassificarTudo()
     colRtOe = LocalizarOuCriarColuna(ws, "RT/OE")
     colDimensao = LocalizarColunaAlternativasOuCriar(ws, Array("DIMENSAO", "GEOBOX"), "DIMENSAO")
     colAro = LocalizarOuCriarColuna(ws, "ARO")
-    colEstepeComp = LocalizarOuCriarColuna(ws, COL_ESTEPE_COMPETICAO_NOME)
+    colEstepeComp = LocalizarOuCriarColuna(ws, colEstepeCompNomeLocal)
 
     ' --- Carrega dicionarios auxiliares ---
     Dim dicMontadoras As Object, dicAnip As Object, dicExcecoesMarca As Object
@@ -134,7 +146,10 @@ Sub ClassificarTudo()
                                      dicGeoboxPorMarca, dicGeoboxGlobalUnicos, dicExcecoesMarca, _
                                      dicGamasPorMarca, dicGamaGlobalUnicos, dicMarcaPorGama, dicExcecoesGama, _
                                      somenteMinBr, diagnosticoRef) Then
-        MsgBox "Nao foi possivel abrir a Tabela de Referencia em:" & vbCrLf & REF_FILE_PATH, vbCritical
+        Dim refPathLocal As String
+        refPathLocal = "C:\Users\E125949\OneDrive - MFP Michelin\" & _
+                        ChrW(193) & "rea de Trabalho\Teste importados\Tabela_Referencia.xlsx"
+        MsgBox "Nao foi possivel abrir a Tabela de Referencia em:" & vbCrLf & refPathLocal, vbCritical
         Exit Sub
     End If
 
@@ -147,7 +162,7 @@ Sub ClassificarTudo()
     ' --- modGama.bas.                                                      ---
     If somenteMinBr Then Set dicMarcaPorGama = CreateObject("Scripting.Dictionary")
 
-    If MOSTRAR_DIAGNOSTICO_REFERENCIA Then
+    If mostrarDiagnosticoRefLocal Then
         MsgBox "DIAGNOSTICO DA TABELA DE REFERENCIA:" & vbCrLf & vbCrLf & diagnosticoRef, vbInformation
     End If
 
